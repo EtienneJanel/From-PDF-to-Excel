@@ -1,8 +1,15 @@
-'''using pyhon 3.6.5'''
+'''using pyhon 2.7'''
 
-import PyPDF2, re, os
+import re, os
+import openpyxl
 from pandas import DataFrame
+# import PyPDF2
 
+PyPDF2_path = "C:\\PYTHONLIBS\\PyPDF2-1.26.0"
+
+import sys
+sys.path.append(PyPDF2_path)
+import PyPDF2
 
 def grapLastPagePDF(path):
 	'''
@@ -68,7 +75,7 @@ def loopAllPDF(PDFdirectory):
 			df = transformToDf(grapLastPagePDF(PDFdirectory+'\\'+listePDF))
 			alldf = alldf.append(df)
 
-	alldf.to_excel('allPDF.xlsx', sheet_name='sheet1', index=False)
+	alldf.to_excel('allPDF_py2.7.xlsx', sheet_name='sheet1', index=False)
 
 df = DataFrame()
 
