@@ -1,15 +1,25 @@
-'''using pyhon 3.6.5'''
-
-import PyPDF2, re, os
+'''using pyhon 2.7'''
+import re, os
+import openpyxl
 from pandas import DataFrame
+# import PyPDF2
+
+resources = "C:\\Users\\Etienne\\Documents\\GitHub\\From-PDF-to-Excel\\ressources"
+excel_output = "C:\\Users\\Etienne\\Documents\\GitHub\\From-PDF-to-Excel\\excel_output"
+
+PyPDF2_path = "C:\\PYTHONLIBS\\PyPDF2-1.26.0"
 
 
-def grapLastPagePDF(path):
+import sys
+sys.path.append(PyPDF2_path)
+import PyPDF2
+
+def grapLastPagePDF(path, fileName):
 	'''
 	from one PDF, grab the last page and 
 	extract text from it
 	'''
-	pdfFileObj = open(path, 'rb') 	
+	pdfFileObj = open(path, 'rb')
 	pdfReader = PyPDF2.PdfFileReader(pdfFileObj) 	# creating a pdf reader object
 	numbPage = pdfReader.getNumPages()				# get the number of pages
 
@@ -17,7 +27,7 @@ def grapLastPagePDF(path):
 		pageObj = pdfReader.getPage(numbPage-1) 	# creating a page object and read last page
 		textinpage = pageObj.extractText() 			# extracting text from page
 	except:
-		print("failed due to encryption")
+		print("failed due to encryption:", fileName)
 		textinpage = [False]
 	
 	pdfFileObj.close()
@@ -33,6 +43,7 @@ def transformToDf(text):
 		"Rent", "Utilities", "Depreciation","Total Operating Expenses","Operating Profit (EBIT)",
 		"Interest Expense","Income before taxes (EBT)","Taxes","Net Income","Number of Shares Outstanding","Earnings Per Share (EPS)"]
 
+	# list that will contain the extracted items
 	n = []
 
 	for i in t:
@@ -63,30 +74,14 @@ def loopAllPDF(PDFdirectory):
 	merge them and parse into excel
 	'''
 	alldf = DataFrame()
-	for listePDF in os.listdir(PDFdirectory):
-		if listePDF.endswith(".pdf"):
-			df = transformToDf(grapLastPagePDF(PDFdirectory+'\\'+listePDF))
+	for fileName in os.listdir(PDFdirectory):
+		if fileName.endswith(".pdf"):
+			df = transformToDf(grapLastPagePDF(PDFdirectory+'\\'+fileName, fileName))
 			alldf = alldf.append(df)
+			print("file extracted:", fileName)
 
-	alldf.to_excel('allPDF.xlsx', sheet_name='sheet1', index=False)
+	alldf.to_excel(excel_output + "\\" + 'allPDF_py2.7.xlsx', sheet_name='sheet1', index=False)
 
-df = DataFrame()
+loopAllPDF(resources)
 
-PDFdirectory = "C:\\Users\\Etienne\\Documents\\GitHub\\From-PDF-to-Excel\\PDF-to-copy"
 
-# loop through all PDF
-loopAllPDF(PDFdirectory)
-
-# To keep
-# number = re.compile(r'(([-]\s+)?(\d+[ ])?\d+[.]\d+)')	# regular expression of the numer such as -123 456.00
-# grossprofit = re.compile(r'Gross Profit((\s)+?([-]\s+)?(\d+[ ])?\d+[.]\d+)') # regular expression of the gross profit
-# df = df.append(df2)	#append another dataframe
-# current_directory = os.getcwd() #current working directory
-
-# text = grapLastPagePDF(path)	# content of the last page
-# df = transformToDf(text)		# to a df
-# df.to_excel('from_PDF_to_XLSX.xlsx', sheet_name='sheet1', index=False) #parse into excel
-
-## list of file in folder
-# listePDF = os.listdir(PDFdirectory)
-# print("liste of PDF", listePDF , "\n")
